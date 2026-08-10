@@ -47,18 +47,19 @@ def parse(subject):
         break  # first plausible year wins
     if best:
         out["date"] = best
-    # INSTITUTION: for the archive-citation shape "... (YYYY). <Institution>. <URL>"
-    # the institution is the segment after the date+period, before any URL.
+    # INSTITUTION: the segment immediately before any URL, else the LAST
+    # ". "-segment that contains a recognizable institution keyword.
+    segs = [s.strip() for s in subject.split(". ")]
     inst = ""
-    m2 = re.search(r"(?:\)|\]|\d{4})\.\s*([^h].*?)(?:\.\s*https?://|$)", subject)
-    if m2:
-        inst = m2.group(1)
-    # fallback: text after last " . " if it looks like an institution
+    if out["url"]:
+        for i, s in enumerate(segs):
+            if out["url"] in s and i > 0:
+                inst = segs[i - 1]
+                break
     if not inst:
-        parts = [p.strip() for p in subject.split(". ")]
-        for p in reversed(parts):
-            if p and not re.search(r"\b(?:18|19)\d{2}\b", p) and "http" not in p:
-                inst = p
+        for s in reversed(segs):
+            if any(k in s.lower() for k in INST_KW) and "http" not in s:
+                inst = s
                 break
     inst = inst.strip().strip(".").strip()
     if out["url"] and out["url"] in inst:
@@ -67,6 +68,28 @@ def parse(subject):
     inst = re.sub(r"^(\[?[A-Za-z /]+\]?|\([^)]*\))\.\s*", "", inst)
     out["institution"] = inst
     return out
+
+INST_KW = ["archives", "archive", "historical society", "library", "museum",
+           "collection", "mnopedia", "nypl", "glenbow", "lac", "lac.", "saskatchewan",
+           "manitoba", "canada", "congress", "digit", "wikipedia", "commons"]
+
+def is_real_institution(s):
+    """True only if `s` looks like a real holding institution (not an address
+    or a descriptive sentence fragment)."""
+    import re
+    s = (s or "").strip()
+    if not s:
+        return False
+    low = s.lower()
+    if len(s) > 70:
+        return False
+    if s.endswith((".", ",")):
+        return False
+    if re.search(r"\b\d{2,4}\s+(broad|street|avenue|ave|road|rd|lane|st)\b", low):
+        return False
+    if low.startswith(("the ", "a ", "an ", "he ", "she ", "they ", "it ", "this ", "photo", "image")):
+        return False
+    return any(k in low for k in INST_KW)
 
 if __name__ == "__main__":
     cache = json.load(open("drive_exif_cache.json"))
