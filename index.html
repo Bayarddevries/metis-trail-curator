@@ -138,8 +138,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 </div>
 
 <div class="tabs">
-  <div class="tab active" id="tabExhibits" onclick="switchTab('exhibits')">Exhibits <span class="tab-count" id="tabExCount">0</span></div>
-  <div class="tab" id="tabImages" onclick="switchTab('images')">All Images <span class="tab-count" id="tabImgCount">0</span></div>
+  <div class="tab" id="tabExhibits" onclick="switchTab('exhibits')">Exhibits <span class="tab-count" id="tabExCount">0</span></div>
+  <div class="tab active" id="tabImages" onclick="switchTab('images')">All Images <span class="tab-count" id="tabImgCount">0</span></div>
 </div>
 
 <div class="summary-bar" id="summaryBar">
@@ -159,9 +159,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   <input type="text" id="exSearch" placeholder="Search exhibits..." oninput="renderExhibits()">
 </div>
 
-<div id="exhibitContent" class="active"></div>
+<div id="exhibitContent"></div>
 
-<div id="imageBrowser">
+<div id="imageBrowser" class="active">
   <div class="browser-toolbar">
     <input type="text" id="imgSearch" placeholder="Search images..." oninput="renderImageBrowser()">
     <select id="imgFilter" onchange="renderImageBrowser()">
